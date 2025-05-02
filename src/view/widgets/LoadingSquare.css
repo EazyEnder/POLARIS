@@ -1,0 +1,52 @@
+.grid-container {
+    width: 100px;
+    height: 100px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 2px;
+    position: relative;
+  }
+  
+  .square {
+    width: 50%;
+    height: 50%;
+    position: absolute;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* Initial positions */
+  .box1 {
+    background-color: red;
+    animation: rotateBox1 5.2s infinite;
+  }
+  .box2 {
+    background-color: black;
+    animation: rotateBox2 5.2s infinite;
+  }
+  .box3 {
+    background-color: blue;
+    animation: rotateBox3 5.2s infinite;
+  }
+  
+  /* Animations for each box rotating to the next position */
+  @keyframes rotateBox1 {
+    0%, 100% { transform: translate(0, 0);}
+    25% { transform: translate(100%, 0); }
+    50% { transform: translate(100%, 100%);}
+    75% { transform: translate(0, 100%);}
+  }
+  
+  @keyframes rotateBox2 {
+    0%, 100%   { transform: translate(100%, 0); }
+    25%  { transform: translate(100%, 100%); }
+    50%  { transform: translate(0, 100%); }
+    75% { transform: translate(0, 0); }
+  }
+  
+  @keyframes rotateBox3 {
+    0%, 100%   { transform: translate(0, 100%); }
+    25%  { transform: translate(0, 0); }
+    50%  { transform: translate(100%, 0); }
+    75% { transform: translate(100%, 100%); }
+  }
