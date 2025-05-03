@@ -1,73 +1,117 @@
-import {useState, useEffect, useRef} from 'react'
-import {UI_COLOR, UI_BORDER, UI_STYLES} from '../../config/uiSettings'
-import { useSpring, animated } from "@react-spring/web";
+import { useState, useEffect, useRef } from 'react';
+import { UI_COLOR, UI_BORDER, UI_STYLES } from '../../config/uiSettings';
 
-/**
- * 
- * Props:
- * size, position, title, icon, deployable, deployable_side
- */
-export default function ComponentWidget(props){
+export default function ComponentWidget(props) {
+    const [size, setSize] = useState(
+        props.size ?? {
+            width: props.width ?? window.innerWidth / 4,
+            height: props.height ?? window.innerHeight / 4,
+        }
+    );
+    const [position, setPosition] = useState(props.position ?? [0, 0]);
+    const [isDeployed, setDeployed] = useState(props.isdeployed ?? true);
+    const [isLoaded, setLoaded] = useState(false);
+    const [contentHeight, setContentHeight] = useState(0);
 
-    const [size, setSize] = useState(props.size ?? {width:props.width ?? window.innerWidth/4,height:props.height ?? window.innerHeight/4});
-    const [position, setPosition] = useState(props.position ? props.position : [0,0]);
-    const [isDeployed, setDeployed] = useState(props.isdeployed ?? false)
-    const [isLoaded, setLoaded] = useState(false)
-
-    const contentRef = useRef();
-    const [measuredHeight, setMeasuredHeight] = useState(0);
-
-    //true for top, false for bottom
+    const contentRef = useRef(null);
     const deployable_side = props.deployable_side ?? true;
 
-    const animationStyle = useSpring({
-        opacity: isLoaded ? 1. : 0.,
-        top: position[1] + (deployable_side ? 0 : (isDeployed ? 0 : size.height * 0.8)),
-        height: isDeployed ? size.height : 24,
-        config: { tension: 150, friction: 26 },
-      });
-
-      useEffect(() => {
-        if (contentRef.current) {
-            setMeasuredHeight(contentRef.current.scrollHeight);
-        }
-        }, [props.children]);
-
-      const animationStyleInside = useSpring({
-        height: isDeployed || !props.deployable ? measuredHeight : 0,
-        opacity: isDeployed || !props.deployable ? 1 : 0,
-        config: { tension: 170, friction: 26 },
-      });
+    let temp_size = props.size ?? {
+        width: props.width ?? window.innerWidth / 4,
+        height: props.height ?? window.innerHeight / 4,
+    }
+    if(size.width != temp_size.width && size.height != temp_size.height)setSize(temp_size);
 
     useEffect(() => {
-        function handleResize() {
-            setSize(props.size ?? {width:props.width ?? window.innerWidth/4,height:props.height ?? window.innerHeight/4});
+
+        if (!isLoaded) setLoaded(true);
+
+        if (contentRef.current) {
+            setContentHeight(contentRef.current.scrollHeight);
         }
-        window.addEventListener('resize', handleResize);
-        if(!isLoaded)setLoaded(true);
-    }, [])
 
-    return(
-        <animated.div onPointerDown={event => {event.stopPropagation()}} 
-             style={{...animationStyle, position:props.placement??"absolute", overflow: "hidden", color:"white" ,width:size.width, height:size.height, left: position[0]}}>
-                <div style={{backgroundColor:props.topbarcolor ?? UI_COLOR.border, overflow: "hidden", userSelect:"none", borderBottom:UI_BORDER, width:"100%", height:"1.5em"}}
-                    onClick={()=>{if(props.deployable ?? false){setDeployed(!isDeployed)}}}>
-                    <div style={Object.assign({},UI_STYLES.title,{float: "left"})}>
-                        {props.title ?? ""}
-                        {props.icon ? <img draggable={false} style={{float:"left", marginLeft:"-0.5em", marginRight:"0.5em", height:"1.5em"}} src={props.icon}/> : ""}
-                    </div>
+    }, [props.children]);
 
-                    {(props.deployable ?? false) &&
-                    <div style={{height:"100%", float: "right"}} 
-                            onClick={()=>{setDeployed(!isDeployed)}}>
-                            <img draggable={false} src={isDeployed ? DOWN_ARROW : UP_ARROW} width={"100%"} height={"100%"}/>
-                    </div>
-                    }
+    const containerStyle = {
+        position: props.placement ?? 'absolute',
+        overflow: 'hidden',
+        color: 'white',
+        width: size.width,
+        height: isDeployed ? size.height : 24,
+        left: position[0],
+        top: position[1] + (deployable_side ? 0 : (isDeployed ? 0 : size.height * 0.8)),
+        opacity: isLoaded ? 1 : 0,
+        transition: 'height 0.3s ease, top 0.3s ease, opacity 0.3s ease',
+        backgroundColor: UI_COLOR.background,
+        borderRadius: props.borderRadius ?? '0px',
+    };
+
+    const contentStyle = {
+        height: isDeployed || !props.deployable ? contentHeight : 0,
+        opacity: isDeployed || !props.deployable ? 1 : 0,
+        overflow: 'auto',
+        pointerEvents: isDeployed || !props.deployable ? 'auto' : 'none',
+        transition: 'height 0.3s ease, opacity 0.3s ease',
+    };
+
+    return (
+        <div
+            onPointerDown={(event) => event.stopPropagation()}
+            style={containerStyle}
+        >
+            <div
+                style={{
+                    backgroundColor: props.topbarcolor ?? UI_COLOR.border,
+                    overflow: 'hidden',
+                    userSelect: 'none',
+                    borderBottom: UI_BORDER,
+                    width: '100%',
+                    height: '1.5em',
+                    cursor: props.deployable ? 'pointer' : 'default',
+                }}
+                onClick={() => {
+                    if (props.deployable) setDeployed(!isDeployed);
+                }}
+            >
+                <div style={{ ...UI_STYLES.title, display: 'flex', alignItems: 'center',  justifyContent: 'center'}}>
+                    {props.icon && (
+                        <img
+                            draggable={false}
+                            style={{
+                                float: 'left',
+                                marginLeft: '-0.5em',
+                                marginRight: '0.5em',
+                                height: '1.5em',
+                            }}
+                            src={props.icon}
+                        />
+                    )}
+                    <span>
+                    {props.title ?? ''}
+                    </span>
                 </div>
-                    <animated.div ref={contentRef} style={{...animationStyleInside, pointerEvents: (isDeployed || !props.deployable) ? "auto" : "none", backgroundColor:UI_COLOR.background, overflow: "auto"}}>
-                        {props.children}
-                    </animated.div>
-        </animated.div>
-    )
 
+                {props.deployable && (
+                    <div
+                        style={{ height: '100%', float: 'right' }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setDeployed(!isDeployed);
+                        }}
+                    >
+                        {/**<img
+                            draggable={false}
+                            src={isDeployed ? DOWN_ARROW : UP_ARROW}
+                            width={'100%'}
+                            height={'100%'}
+                        />*/}
+                    </div>
+                )}
+            </div>
+
+            <div ref={contentRef} style={contentStyle}>
+                {props.children}
+            </div>
+        </div>
+    );
 }
