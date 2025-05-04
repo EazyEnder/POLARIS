@@ -1,6 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog} = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs/promises');
 
 let backendProcess;
 const backendPath = path.join(__dirname, 'backend');
@@ -11,7 +12,7 @@ function createWindow() {
     height: 700,
     icon: path.join(__dirname, 'logo.png'),
     webPreferences: {
-      //preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 
@@ -45,4 +46,39 @@ app.on('window-all-closed', () => {
     backendProcess.kill();
     app.quit();
   }
+});
+
+ipcMain.handle('dialog:selectFolder', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  });
+  if (result.canceled) return null;
+  return result.filePaths[0];
+});
+
+async function readDirectoryRecursive(dirPath) {
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+
+  const result = await Promise.all(entries.map(async (entry) => {
+    const fullPath = path.join(dirPath, entry.name);
+
+    if (entry.isDirectory()) {
+      return {
+        name: entry.name,
+        type: 'folder',
+        children: await readDirectoryRecursive(fullPath),
+      };
+    } else {
+      return {
+        name: entry.name,
+        type: 'file',
+      };
+    }
+  }));
+
+  return result;
+}
+
+ipcMain.handle('readFolder', async (event, folderPath) => {
+  return await readDirectoryRecursive(folderPath);
 });

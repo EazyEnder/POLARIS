@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Workspace } from '../../objects/workspace/Workspace';
 import { Node } from '../../objects/workspace/Node';
 import { NodeView } from './Node';
-import { UI_COLOR } from '../../config/uiSettings';
+import { UI_COLOR, UI_BOX_SHADOW } from '../../config/uiSettings';
 import { ConnectorView } from './Connector';
+import { WorkspaceMapView } from './WorkspaceMap';
 
 
 export function WorkspaceView(props) {
@@ -12,6 +13,7 @@ export function WorkspaceView(props) {
     const [draggingNodeId, setDraggingNodeId] = useState(null);
     const dragOffset = useRef({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
+    const canvasRef = useRef();
 
     const [connectionBeingCreated, setConnectionBeingCreated] = useState(null)
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -28,9 +30,12 @@ export function WorkspaceView(props) {
         if (workspace.nodes.length === 0) {
             workspace.nodes.push(new Node());
             workspace.nodes.push(new Node());
+            workspace.nodes.push(new Node());
             workspace.nodes[1].type = "component";
             workspace.nodes[1].position.x = 200;
             workspace.nodes[1].position.y = 150;
+            workspace.nodes[2].position.x = 400;
+            workspace.nodes[2].position.y = 150;
             setRefresh(r => !r);
         }
     }, [workspace]);
@@ -71,12 +76,31 @@ export function WorkspaceView(props) {
 
     const handleMouseMove = (e) => {
         if (!connectionBeingCreated) return;
-        setMousePos({ x: e.clientX, y: e.clientY});
+        const canvasrect = canvasRef.current.getBoundingClientRect();
+        setMousePos({ x: e.clientX-canvasrect.left, y: e.clientY-canvasrect.top});
     };
 
     const handleCanvasClick = (e) => {
         if (connectionBeingCreated) setConnectionBeingCreated(null);
     }
+
+    useLayoutEffect(() => {
+        const observer = new ResizeObserver(() => {
+          if (canvasRef.current) {
+            setRefresh(r => !r);
+          }
+        });
+      
+        if (canvasRef.current) {
+          observer.observe(canvasRef.current);
+        }
+      
+        return () => {
+          if (canvasRef.current) {
+            observer.unobserve(canvasRef.current);
+          }
+        };
+      }, []);
 
     useEffect(() => {
         window.addEventListener('mousemove', handleDrag);
@@ -105,9 +129,11 @@ export function WorkspaceView(props) {
     return (
         <div
             className="canvas"
-            style={{ overflow: 'hidden', width: '100vw', height: '100vh', position: 'relative' }}
+            ref={canvasRef}
+            style={{ overflow: 'hidden', width: '100%', height: '100%', position: 'relative', boxShadow: UI_BOX_SHADOW}}
             onClick={handleCanvasClick}
             onWheel={handleWheel}
+            onDragStart={(e) => {e.preventDefault();}}
         >
             {connectionBeingCreated && (<svg style={{ position: 'absolute', width: '100%', height: '100%' }}>
                 <polyline
@@ -135,12 +161,22 @@ export function WorkspaceView(props) {
                 <NodeView
                     key={node.id}
                     node={node}
-                    onDragStart={(e) => handleStartDrag(node.id, e.clientX, e.clientY)}
-                    setConnectionBeingCreated={(e)=>{setMousePos({ x: e.x, y: e.y}); setConnectionBeingCreated(e);}}
+                    onDragStart={(e) => {handleStartDrag(node.id, e.clientX, e.clientY)}}
+                    setConnectionBeingCreated={(e)=>{
+                        setMousePos({ x: e.x, y: e.y}); setConnectionBeingCreated(e);
+                    }}
                     connectionBeingCreated={connectionBeingCreated}
                     toCanvasScale={toCanvasScale}
+                    canvasRef={canvasRef}
                 />
             ))}
+            <div style={{position: 'absolute',width: '20vw',height: '20vh', bottom: '20px', right: '20px',
+                backgroundColor: 'rgba(0,0,0,0.)',border: `1px solid ${UI_COLOR.border}`,overflow: 'hidden',
+                pointerEvents: 'none'
+                }}
+            >
+            <WorkspaceMapView workspace={workspace}/>
+            </div>
         </div>
     );
 }

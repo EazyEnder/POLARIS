@@ -24,19 +24,22 @@ async function getLangData(LANG) {
         .catch((e) => console.error(e));
   }
 
-async function getLanguages(){
-    let langs = {}
-    LANGS_AVAILABLE.forEach(async lang => {
-        langs[lang] = await getLangData(lang);
-    });
-    return langs;
+export async function getLanguages(){
+    const entries = await Promise.all(
+        LANGS_AVAILABLE.map(async (lang) => [lang, await getLangData(lang)])
+    );
+    return Object.fromEntries(entries);
 }
-let LANGUAGES = await getLanguages()
+
+let LANGUAGES = {};
+export async function initLanguages() {
+    LANGUAGES = await getLanguages();
+}
 
 /**Return the translation of a string id*/
 export function getTranslation(STRING_ID) {
     if("")return STRING_ID;
-    if(!(LANG_CHOOSEN in LANGUAGES))return STRING_ID;
+    if(!(LANG_CHOOSEN in LANGUAGES)){return STRING_ID};
     const value = LANGUAGES[LANG_CHOOSEN];
     if(value === undefined || value === null)return STRING_ID;
     if(!(STRING_ID in value))return STRING_ID;

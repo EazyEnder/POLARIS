@@ -2,7 +2,7 @@ import ComponentWidget from '../widgets/ComponentWidget';
 import { UI_COLOR, getNodeColor } from '../../config/uiSettings';
 import React, { useState, useEffect } from 'react';
 
-export function NodeView({ node, onDragStart, connectionBeingCreated,setConnectionBeingCreated, toCanvasScale }) {
+export function NodeView({ node, onDragStart, connectionBeingCreated,setConnectionBeingCreated, toCanvasScale, canvasRef }) {
 
     const node_type = node.type;
     let color = getNodeColor(node_type);
@@ -20,7 +20,10 @@ export function NodeView({ node, onDragStart, connectionBeingCreated,setConnecti
                 })
             }
         }
-        else setConnectionBeingCreated({input:isinput, node_start:node.id, x:e.clientX, y:e.clientY});
+        else{
+            const canvasrect = canvasRef.current.getBoundingClientRect();
+            setConnectionBeingCreated({input:isinput, node_start:node.id, x:e.clientX-canvasrect.left, y:e.clientY-canvasrect.top});
+        }
     };
 
     return (

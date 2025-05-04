@@ -1,0 +1,3 @@
+ui_fe_openworkspace: Open Workspace
+ui_fe_selectfolder: Select Folder
+ui_fe_filesin: Files in: 
