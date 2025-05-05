@@ -44,6 +44,7 @@ export default function ComponentWidget(props) {
         transition: 'height 0.3s ease, top 0.3s ease, opacity 0.3s ease',
         backgroundColor: UI_COLOR.background,
         borderRadius: props.borderRadius ?? '0px',
+        border: props.border ?? '',
     };
 
     const contentStyle = {

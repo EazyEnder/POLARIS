@@ -5,6 +5,7 @@ import { NodeView } from './Node';
 import { UI_COLOR, UI_BOX_SHADOW } from '../../config/uiSettings';
 import { ConnectorView } from './Connector';
 import { WorkspaceMapView } from './WorkspaceMap';
+import { NodeCreator } from './NodeCreator';
 
 
 export function WorkspaceView(props) {
@@ -14,6 +15,12 @@ export function WorkspaceView(props) {
     const dragOffset = useRef({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const canvasRef = useRef();
+    const [nodeCreator, setNodeCreator] = useState(null);
+
+    const nodeCreatorRef = useRef(nodeCreator);
+    useEffect(() => {
+        nodeCreatorRef.current = nodeCreator;
+    }, [nodeCreator]);
 
     const [connectionBeingCreated, setConnectionBeingCreated] = useState(null)
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -77,11 +84,35 @@ export function WorkspaceView(props) {
     const handleMouseMove = (e) => {
         if (!connectionBeingCreated) return;
         const canvasrect = canvasRef.current.getBoundingClientRect();
-        setMousePos({ x: e.clientX-canvasrect.left, y: e.clientY-canvasrect.top});
+        if(nodeCreatorRef.current == null){
+            setMousePos({ x: e.clientX-canvasrect.left, y: e.clientY-canvasrect.top});
+        }
     };
 
     const handleCanvasClick = (e) => {
-        if (connectionBeingCreated) setConnectionBeingCreated(null);
+        if (connectionBeingCreated){
+            if(nodeCreator == null){
+                setNodeCreator({
+                    position:{x: mousePos.x ,y: mousePos.y},
+                    connection: connectionBeingCreated,
+                });
+            }else{
+                setConnectionBeingCreated(null);
+            }
+        }
+        if (nodeCreator){
+            setNodeCreator(null);
+        }
+    }
+
+    const handleCanvasRightClick = (e) => {
+        if(nodeCreator == null){
+            const canvasrect = canvasRef.current.getBoundingClientRect();
+            setNodeCreator({
+                position:{x: e.clientX-canvasrect.left ,y: e.clientY-canvasrect.top},
+                connection: connectionBeingCreated,
+            });
+        }
     }
 
     useLayoutEffect(() => {
@@ -132,6 +163,7 @@ export function WorkspaceView(props) {
             ref={canvasRef}
             style={{ overflow: 'hidden', width: '100%', height: '100%', position: 'relative', boxShadow: UI_BOX_SHADOW}}
             onClick={handleCanvasClick}
+            onContextMenu={handleCanvasRightClick}
             onWheel={handleWheel}
             onDragStart={(e) => {e.preventDefault();}}
         >
@@ -177,6 +209,7 @@ export function WorkspaceView(props) {
             >
             <WorkspaceMapView workspace={workspace}/>
             </div>
+            {nodeCreator && <NodeCreator nodeCreator={nodeCreator} setNodeCreator={setNodeCreator}/>}
         </div>
     );
 }

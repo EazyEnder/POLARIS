@@ -1,3 +1,16 @@
 ui_fe_openworkspace: Open Workspace
 ui_fe_selectfolder: Select Folder
 ui_fe_filesin: Files in: 
+
+ui_widget_search: Search
+ui_widget_search_placeholder: Enter text to search
+
+ui_nodecreator_title: Create a Node
+
+ui_terminal: Console
+
+ui_logo_desc: In development - Build 
+
+ui_settings: Settings
+ui_settings_menu_colors: Colors
+ui_settings_color: UI Colors

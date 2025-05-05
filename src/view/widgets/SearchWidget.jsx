@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import ComponentWidget from "./ComponentWidget";
-import { UI_COLOR } from '../../config/uiSettings';
+import { UI_COLOR, UI_BORDER } from '../../config/uiSettings';
 import { getTranslation } from "../../config/Localization";
-import './SearchWidget.css'; // Import CSS file
+import './SearchWidget.css';
 
 export default function SearchWidget(props) {
 
@@ -33,7 +33,7 @@ export default function SearchWidget(props) {
     };
 
     const input_search_style = {
-        width: "98%",
+        width: "97%",
         height: "10%",
         backgroundColor: UI_COLOR.opaque_background,
         borderColor: UI_COLOR.border,
@@ -51,7 +51,7 @@ export default function SearchWidget(props) {
     const OBJECT_LIST = props.objects ?? ["test1", "test2", "test3"];
 
     return (
-        <ComponentWidget icon={props.icon} title={props.title ?? getTranslation("ui_widget_search")} isdeployed={props.isdeployed ?? true} deployable size={size} deployable_side={false}>
+        <ComponentWidget icon={props.icon} border={UI_BORDER} topbarcolor={UI_COLOR.node_components} position={position} title={props.title ?? getTranslation("ui_widget_search")} isdeployed={props.isdeployed ?? true} deployable={props.deployable ?? false} size={size} deployable_side={false}>
             <div style={divstyle} className="fade-in">
                 <input
                     placeholder={getTranslation("ui_widget_search_placeholder")}
@@ -77,7 +77,7 @@ function ListElement(props) {
                 textDecoration: "none",
                 userSelect: "none",
                 listStyleType: "none",
-                backgroundColor: hover ? UI_COLOR.borderColor : UI_COLOR.opaque_background,
+                backgroundColor: hover ? UI_COLOR.node_components : UI_COLOR.opaque_background,
                 transition: "background-color 0.3s ease"
             }}
             onMouseEnter={() => setHover(true)}
