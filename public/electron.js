@@ -1,3 +1,4 @@
+const os = require('os');
 const { app, BrowserWindow, ipcMain, dialog} = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
@@ -21,7 +22,8 @@ function createWindow() {
 
 app.whenReady().then(() => {
   backendProcess = spawn(
-    'C:/Users/Zack/AppData/Local/Microsoft/WindowsApps/python3.11.exe',
+    //'C:/Users/Zack/AppData/Local/Microsoft/WindowsApps/python3.11.exe',
+    path.join(os.homedir(), 'novae', 'bin', 'python3'),
     ['-m', 'uvicorn', 'main:app', '--host', '127.0.0.1', '--port', '8000'],
     { cwd: backendPath }
   );

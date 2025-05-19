@@ -9,6 +9,7 @@ const UI_COLOR_BASE_VALUE = {
     node_tensorops:"rgb(188, 114, 150)",
     node_workspaces:"rgb(140, 141, 46)",
     node_components:"rgb(149, 160, 177)",
+    node_activation:"rgb(135, 188, 114)",
 }
 export var UI_COLOR = JSON.parse(localStorage.getItem("UI_COLOR")) ?? JSON.parse(JSON.stringify(UI_COLOR_BASE_VALUE))
 if(localStorage.getItem("UI_COLOR") == null) localStorage.setItem("UI_COLOR",JSON.stringify(UI_COLOR))

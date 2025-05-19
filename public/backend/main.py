@@ -12,4 +12,5 @@ app.add_middleware(
     allow_origins=origins,
 )
 
+import routers.blueprint
 import ConnectionManager

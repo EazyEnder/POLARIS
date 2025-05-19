@@ -7,6 +7,7 @@ import { ConnectorView } from './Connector';
 import { WorkspaceMapView } from './WorkspaceMap';
 import { NodeCreator } from './NodeCreator';
 
+import { BLUEPRINT_BLOCKS } from '../../config/BlueprintBlocks';
 
 export function WorkspaceView(props) {
     const [workspace] = useState(props.workspace ?? new Workspace());
