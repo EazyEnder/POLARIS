@@ -2,26 +2,40 @@ import React, { useState, useEffect, useRef } from 'react';
 import {getTranslation} from '../config/Localization'
 import { UI_COLOR, UI_STYLES, UI_BORDER, UI_BOX_SHADOW } from '../config/uiSettings';
 
-function CollapsibleFile({ file, level }) {
+function CollapsibleFile({ file, level, setObject, object, fullPath}) {
   const [isOpen, setIsOpen] = useState(false);
+  const [hover, setHover] = useState(false);
 
   const hasChildren = file.type === 'folder' && file.children?.length;
+  const path = `${fullPath}/${file.name}`;
 
-  const toggle = () => {
-    if (hasChildren) {
-      setIsOpen(prev => !prev);
+  const click = () => {
+    if(file.type === 'folder') {
+      if(hasChildren){
+        setIsOpen(prev => !prev);
+      }
+    }
+    else if(file.type === 'file'){
+      const ext = file.name.split('.')[file.name.split('.').length-1]
+      if(ext === 'fits' || ext === 'npy'){
+        setObject({"type":"CloudViewer","props":{"path":path}})
+      }
     }
   };
 
+  const isSelected = (path == object?.props?.path);
+
   return (
     <div style={{ marginLeft: level * 20, cursor: hasChildren ? 'pointer' : 'default', color:UI_COLOR.title}}>
-      <div onClick={toggle}>
+
+      <div onClick={click}  onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} style={{backgroundColor:isSelected || hover ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.0)"}}>
         {file.type === 'folder' ? (isOpen ? '📂' : '📁') : '📄'} {file.name}
       </div>
+
       {isOpen && hasChildren && (
         <div>
           {file.children.map((child, i) => (
-            <CollapsibleFile key={i} file={child} level={level + 1} />
+            <CollapsibleFile key={i} file={child} level={level + 1} fullPath={path} setObject={setObject} object={object}/>
           ))}
         </div>
       )}
@@ -29,7 +43,7 @@ function CollapsibleFile({ file, level }) {
   );
 }
 
-export function FileExplorerView({setFileExplorerWidth}) {
+export function FileExplorerView({setObject, object}) {
   const [path, setPath] = useState(null);
   const [files, setFiles] = useState([]);
   const divRef = useRef();
@@ -59,7 +73,7 @@ export function FileExplorerView({setFileExplorerWidth}) {
                 {getTranslation("ui_fe_filesin").toUpperCase()}{path.split("\\")[path.split("\\").length-1]}
             </div>
             {files.map((f, i) => (
-                <CollapsibleFile key={i} file={f} level={0} />
+                <CollapsibleFile key={i} file={f} level={0} setObject={setObject} fullPath={path} object={object}/>
             ))}
             </div>
         )}

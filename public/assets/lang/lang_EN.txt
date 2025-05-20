@@ -14,3 +14,5 @@ ui_logo_desc: In development - Build
 ui_settings: Settings
 ui_settings_menu_colors: Colors
 ui_settings_color: UI Colors
+
+ui_loading_cloudview: 3D View

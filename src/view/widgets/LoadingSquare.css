@@ -17,16 +17,16 @@
   
   /* Initial positions */
   .box1 {
-    background-color: red;
     animation: rotateBox1 5.2s infinite;
   }
   .box2 {
-    background-color: black;
     animation: rotateBox2 5.2s infinite;
   }
   .box3 {
-    background-color: blue;
     animation: rotateBox3 5.2s infinite;
+  }
+  .box4 {
+    animation: rotateBox4 5.2s infinite;
   }
   
   /* Animations for each box rotating to the next position */
@@ -49,4 +49,11 @@
     25%  { transform: translate(0, 0); }
     50%  { transform: translate(100%, 0); }
     75% { transform: translate(100%, 100%); }
+  }
+
+  @keyframes rotateBox4 {
+    0%, 100%   { transform: translate(100%, 100%); }
+    25%  { transform: translate(0, 100%); }
+    50%  { transform: translate(0, 0); }
+    75% { transform: translate(100%, 0); }
   }

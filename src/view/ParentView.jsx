@@ -6,6 +6,8 @@ import {ResizablePanel} from './widgets/ResizablePanel';
 import { TerminalPanel } from './TerminalPanel';
 import { UI_COLOR } from '../config/uiSettings';
 import { LogoButton } from './LogoButton';
+import { CloudViewerScene } from './viewer/CloudViewer';
+import LoadingSquare from './widgets/LoadingSquare';
 
 
 export default class ParentView extends Component {
@@ -15,14 +17,28 @@ export default class ParentView extends Component {
         this.state = {
             refesh: false,
             children: [],
+            object: {"type":"Workspace","props":{}},
+            loading: false,
         }
     }
+
+    setLoading = (bool) => {
+        this.setState(prevstate => ({
+            loading: bool
+        }));
+    }
+
+    setObject = (object) => {
+        this.setState(prevState => ({
+          object: object
+        }));
+    };
 
     refresh = () => {
         this.setState(prevState => ({
           refresh: !prevState.refresh
         }));
-      };
+    };
 
     //Remove a child view using his id 
     removeChild = (id) => {
@@ -69,13 +85,14 @@ export default class ParentView extends Component {
                     initialSize={20}
                 >
                     <div style={{ flex: 1, height:"100%", paddingRight: 3, overflow: 'hidden', boxSizing: 'border-box', backgroundColor: UI_COLOR.node_components}}>
-                        <FileExplorerView />
+                        <FileExplorerView setObject={this.setObject} object={this.state.object}/>
                     </div>
                 </ResizablePanel>
 
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <ResizablePanel direction="vertical" initialSize={80}>
-                    <WorkspaceView />
+                        {this.state.object["type"] == "Workspace" && <WorkspaceView object={this.state.object["props"]}/>}
+                        {this.state.object["type"] == "CloudViewer" && <CloudViewerScene object={this.state.object["props"]} setLoading={this.setLoading}/>}
                     </ResizablePanel>
 
                     <div style={{ flex: 1, paddingTop: 3,  boxSizing: 'border-box', overflow: 'hidden', backgroundColor: UI_COLOR.node_components }}>
@@ -83,6 +100,7 @@ export default class ParentView extends Component {
                     </div>
                 </div>
                 </div>
+                {this.state.loading && <LoadingSquare loading={this.state.loading}/>}
                 <LogoButton removeChild={this.removeChild} addChild={this.addChild} refresh={this.refresh}/>
                 {this.getChildren("GLOBAL")}  
             </WebSocketProvider>
